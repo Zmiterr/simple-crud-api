@@ -1,5 +1,4 @@
 const http = require('http');
-const url = require('url');
 require('dotenv').config();
 const { validate, v4: uuidv4 } = require('uuid');
 let persons = require('./persons');
@@ -10,20 +9,11 @@ const server = http.createServer((req, res) => {
   res.writeHead(200, {
     'Content-type': 'application/json',
   });
-  // if (req.url === '/') {
-  //   res.end(JSON.stringify([{
-  //     hello: 'world',
-  //   }]));
-  // }
-  // if (req.url === '/q') {
-  //   res.end(JSON.stringify(persons));
-  // }
-  const argparse = url.parse(req.url, true);
 
-  if (argparse.pathname === '/person  ' && req.method === 'GET') {
+  if (req.url === '/person  ' && req.method === 'GET') {
     res.end(JSON.stringify(persons));
   }
-  if (argparse.pathname === '/person' && req.method === 'POST') {
+  if (req.url === '/person' && req.method === 'POST') {
     req.on('end', () => {
       const message = { message: 'no title in body request!' };
 
@@ -46,7 +36,7 @@ const server = http.createServer((req, res) => {
       }
     });
   }
-  if (argparse.pathname === '/person' && req.method === 'PUT') {
+  if (req.url === '/person' && req.method === 'PUT') {
     req.on('data', (data) => {
       const userData = JSON.parse(data);
       if (userData) {
@@ -84,7 +74,7 @@ const server = http.createServer((req, res) => {
       }
     });
   }
-  if (argparse.pathname === '/person' && req.method === 'DELETE') {
+  if (req.url === '/person' && req.method === 'DELETE') {
     const delId = '61eb8e5e-b734-4296-98f4-40aec1e6606c'; // TODO get id from query string
     if (validate(delId)) {
       persons = persons.filter((person) => person.id !== delId);
