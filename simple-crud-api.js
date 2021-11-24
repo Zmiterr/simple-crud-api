@@ -125,4 +125,5 @@ const server = http.createServer((req, res) => {
   }
 });
 
+// eslint-disable-next-line no-console
 server.listen(PORT, () => console.log(`server started on port ${PORT}`));
