@@ -10,6 +10,9 @@ const server = http.createServer((req, res) => {
     'Content-type': 'application/json',
   });
 
+  const path = req.url.split('/');
+  const personIdParam = path[path.indexOf('person') + 1];
+
   const validateParams = (name, age, hobbies) => {
     if (!name || !age) {
       const message = { message: 'name and age is required params' };
@@ -38,7 +41,29 @@ const server = http.createServer((req, res) => {
     }
   }
 
-  // TODO make get user (200, 400, 404)
+  if (req.url.match(/\/person\/\w+/) && req.method === 'GET') {
+    try {
+      if (validate(personIdParam)) {
+        const editedPerson = persons.filter((person) => person.id === personIdParam);
+        if (editedPerson[0]) {
+          const selectedPerson = persons.filter((person) => person.id === personIdParam);
+          res.end(JSON.stringify(selectedPerson[0]));
+        } else {
+          const message = 'ID not found';
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(message, null, 2));
+        }
+      } else {
+        const message = 'invalid ID';
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(message, null, 2));
+      }
+    } catch (error) {
+      const message = { message: `Error execution ${error}` };
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(message, null, 2));
+    }
+  }
 
   if (req.url === '/person' && req.method === 'POST') {
     req.on('end', () => {
@@ -55,7 +80,7 @@ const server = http.createServer((req, res) => {
         persons.push({ id: uuidv4(), ...validatedUser.userObject });
 
         res.writeHead(201, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(validatedUser.userObject, null, 2));
+        res.end(JSON.stringify(persons[persons.length - 1], null, 2));
       } else {
         // const message = { message: 'no title in body request!' };
 
@@ -64,12 +89,12 @@ const server = http.createServer((req, res) => {
       }
     });
   }
-  if (req.url === '/person' && req.method === 'PUT') {
+  if (req.url.match(/\/person\/\w+/) && req.method === 'PUT') {
     req.on('data', (data) => {
       const { name, age, hobbies } = JSON.parse(data);
       const validatedUser = validateParams(name, age, hobbies);
 
-      const id = '61eb8e5e-b734-4296-98f4-40aec1e6606c'; // TODO get id from query string
+      const id = String(personIdParam);
       if (validate(id)) {
         if (!(validatedUser.valid)) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
@@ -90,7 +115,7 @@ const server = http.createServer((req, res) => {
             res.end(JSON.stringify(message, null, 2));
           }
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(editedPerson[0], null, 2));
+          res.end(JSON.stringify({ id, ...editedPerson[0] }, null, 2));
         }
       } else {
         const message = { message: 'wrong or empty id parameter!' };
@@ -99,8 +124,8 @@ const server = http.createServer((req, res) => {
       }
     });
   }
-  if (req.url === '/person' && req.method === 'DELETE') {
-    const delId = '61eb8e5e-b734-4296-98f4-40aec1e6606c'; // TODO get id from query string
+  if (req.url.match(/\/person\/\w+/) && req.method === 'DELETE') {
+    const delId = String(personIdParam);
     if (!delId) {
       const message = { message: 'no query parameter!' };
       res.writeHead(400, { 'Content-Type': 'application/json' });
