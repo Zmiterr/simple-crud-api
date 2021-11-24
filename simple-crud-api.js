@@ -10,6 +10,23 @@ const server = http.createServer((req, res) => {
     'Content-type': 'application/json',
   });
 
+  const validateParams = (name, age, hobbies) => {
+    if (!name || !age) {
+      const message = { message: 'name and age is required params' };
+      return { valid: false, message };
+    }
+    if (hobbies && !(Array.isArray(hobbies))) {
+      const message = { message: 'hobbies must be array' };
+      return { valid: false, message };
+    }
+    const userObject = {
+      name: name.toString(),
+      age: Number(age),
+      hobbies,
+    };
+    return { valid: true, userObject };
+  };
+
   if (req.url === '/person' && req.method === 'GET') {
     try {
       // throw new Error('This is 500 error');
@@ -31,54 +48,45 @@ const server = http.createServer((req, res) => {
       res.end(JSON.stringify(message, null, 2));
     });
     req.on('data', (data) => {
-      const userData = JSON.parse(data);
+      const { name, age, hobbies } = JSON.parse(data);
+      const validatedUser = validateParams(name, age, hobbies);
 
-      if (userData) { // TODO make validator (400)
-        persons.push({ id: uuidv4(), ...userData });
+      if (validatedUser.valid) {
+        persons.push({ id: uuidv4(), ...validatedUser.userObject });
 
         res.writeHead(201, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(persons, null, 2));
       } else {
-        const message = { message: 'no title in body request!' };
+        // const message = { message: 'no title in body request!' };
 
         res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(message, null, 2));
+        res.end(JSON.stringify(validatedUser.message, null, 2));
       }
     });
   }
   if (req.url === '/person' && req.method === 'PUT') {
     req.on('data', (data) => {
-      const userData = JSON.parse(data);
-      if (userData) {
-        const { id } = userData;
-        if (validate(id)) { // TODO check empty or invalid (404, 400)
-          const jsondata = JSON.parse(data);
-          const { name, age, hobbies } = jsondata;
+      const { name, age, hobbies } = JSON.parse(data);
+      const validatedUser = validateParams(name, age, hobbies);
 
-          if (!true) { // TODO add validator function
-            const message = { message: 'no title found in body request!' };
-
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(message, null, 2));
-          } else {
-            persons.forEach((person, index) => {
-              if (person.id === id) {
-                persons[index].name = name;
-                persons[index].age = age;
-                persons[index].hobbies = hobbies;
-              }
-            });
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(persons, null, 2));
-          }
-        } else {
-          const message = { message: 'wrong or empty id parameter!' };
+      const id = '61eb8e5e-b734-4296-98f4-40aec1e6606c'; // TODO get id from query string
+      if (validate(id)) {
+        if (!(validatedUser.valid)) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(message, null, 2));
+          res.end(JSON.stringify(validatedUser.message, null, 2));
+        } else {
+          persons.forEach((person, index) => {
+            if (person.id === id) {
+              persons[index].name = name;
+              persons[index].age = age;
+              persons[index].hobbies = hobbies;
+            }
+          });
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(persons, null, 2));
         }
       } else {
-        const message = { message: 'no query parameter!' };
-
+        const message = { message: 'wrong or empty id parameter!' };
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(message, null, 2));
       }
