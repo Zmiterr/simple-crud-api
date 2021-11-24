@@ -10,9 +10,12 @@ const server = http.createServer((req, res) => {
     'Content-type': 'application/json',
   });
 
-  if (req.url === '/person  ' && req.method === 'GET') {
+  if (req.url === '/person' && req.method === 'GET') {
     res.end(JSON.stringify(persons));
   }
+
+  // TODO make get user (200, 400, 404)
+
   if (req.url === '/person' && req.method === 'POST') {
     req.on('end', () => {
       const message = { message: 'no title in body request!' };
@@ -23,10 +26,10 @@ const server = http.createServer((req, res) => {
     req.on('data', (data) => {
       const userData = JSON.parse(data);
 
-      if (userData) {
+      if (userData) { // TODO make validator (400)
         persons.push({ id: uuidv4(), ...userData });
 
-        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.writeHead(201, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(persons, null, 2));
       } else {
         const message = { message: 'no title in body request!' };
@@ -41,7 +44,7 @@ const server = http.createServer((req, res) => {
       const userData = JSON.parse(data);
       if (userData) {
         const { id } = userData;
-        if (validate(id)) {
+        if (validate(id)) { // TODO check empty or invalid (404, 400)
           const jsondata = JSON.parse(data);
           const { name, age, hobbies } = jsondata;
 
@@ -76,14 +79,19 @@ const server = http.createServer((req, res) => {
   }
   if (req.url === '/person' && req.method === 'DELETE') {
     const delId = '61eb8e5e-b734-4296-98f4-40aec1e6606c'; // TODO get id from query string
+    if (!delId) {
+      const message = { message: 'no query parameter!' };
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(message, null, 2));
+    }
     if (validate(delId)) {
       persons = persons.filter((person) => person.id !== delId);
 
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(persons, null, 2));
     } else {
-      const message = { message: 'no query parameter!' };
-      res.writeHead(400, { 'Content-Type': 'application/json' });
+      const message = { message: 'person is wrong!' };
+      res.writeHead(404, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(message, null, 2));
     }
   }
