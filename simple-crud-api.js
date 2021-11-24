@@ -30,6 +30,7 @@ const server = http.createServer((req, res) => {
     return { valid: true, userObject };
   };
 
+  // TODO write regExp for support "/" to end of pass
   if (req.url === '/person' && req.method === 'GET') {
     try {
       // throw new Error('This is 500 error');
