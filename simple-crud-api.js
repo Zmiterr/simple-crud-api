@@ -11,7 +11,14 @@ const server = http.createServer((req, res) => {
   });
 
   if (req.url === '/person' && req.method === 'GET') {
-    res.end(JSON.stringify(persons));
+    try {
+      // throw new Error('This is 500 error');
+      res.end(JSON.stringify(persons));
+    } catch (error) {
+      const message = { message: `Error execution ${error}` };
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(message, null, 2));
+    }
   }
 
   // TODO make get user (200, 400, 404)
