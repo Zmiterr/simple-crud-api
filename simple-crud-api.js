@@ -166,6 +166,9 @@ const server = http.createServer((req, res) => {
       res.end(JSON.stringify(message, null, 2));
     }
   }
+  const message = `Error 404:  ${req.url} not found`;
+  res.writeHead(404, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify(message, null, 2));
 });
 
 // eslint-disable-next-line no-console
