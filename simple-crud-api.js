@@ -66,85 +66,103 @@ const server = http.createServer((req, res) => {
   }
 
   if (req.url === '/person' && req.method === 'POST') {
-    req.on('end', () => {
-      const message = { message: 'no title in body request!' };
-
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(message, null, 2));
-    });
-    req.on('data', (data) => {
-      const { name, age, hobbies } = JSON.parse(data);
-      const validatedUser = validateParams(name, age, hobbies);
-
-      if (validatedUser.valid) {
-        persons.push({ id: uuidv4(), ...validatedUser.userObject });
-
-        res.writeHead(201, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(persons[persons.length - 1], null, 2));
-      } else {
-        // const message = { message: 'no title in body request!' };
+    try {
+      req.on('end', () => {
+        const message = { message: 'no title in body request!' };
 
         res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(validatedUser.message, null, 2));
-      }
-    });
-  }
-  if (req.url.match(/\/person\/\w+/) && req.method === 'PUT') {
-    req.on('data', (data) => {
-      const { name, age, hobbies } = JSON.parse(data);
-      const validatedUser = validateParams(name, age, hobbies);
+        res.end(JSON.stringify(message, null, 2));
+      });
+      req.on('data', (data) => {
+        const { name, age, hobbies } = JSON.parse(data);
+        const validatedUser = validateParams(name, age, hobbies);
 
-      const id = String(personIdParam);
-      if (validate(id)) {
-        if (!(validatedUser.valid)) {
+        if (validatedUser.valid) {
+          persons.push({ id: uuidv4(), ...validatedUser.userObject });
+
+          res.writeHead(201, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(persons[persons.length - 1], null, 2));
+        } else {
+        // const message = { message: 'no title in body request!' };
+
           res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify(validatedUser.message, null, 2));
-        } else {
-          const editedPerson = persons.filter((person) => person.id === id);
-          if (editedPerson[0]) {
-            persons.forEach((person, index) => {
-              if (person.id === id) {
-                persons[index].name = name;
-                persons[index].age = age;
-                persons[index].hobbies = hobbies;
-              }
-            });
-          } else {
-            const message = 'ID not found';
-            res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(message, null, 2));
-          }
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ id, ...editedPerson[0] }, null, 2));
         }
-      } else {
-        const message = { message: 'wrong or empty id parameter!' };
+      });
+    } catch (error) {
+      const message = { message: `Error execution ${error}` };
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(message, null, 2));
+    }
+  }
+  if (req.url.match(/\/person\/\w+/) && req.method === 'PUT') {
+    try {
+      req.on('data', (data) => {
+        const { name, age, hobbies } = JSON.parse(data);
+        const validatedUser = validateParams(name, age, hobbies);
+
+        const id = String(personIdParam);
+        if (validate(id)) {
+          if (!(validatedUser.valid)) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(validatedUser.message, null, 2));
+          } else {
+            const editedPerson = persons.filter((person) => person.id === id);
+            if (editedPerson[0]) {
+              persons.forEach((person, index) => {
+                if (person.id === id) {
+                  persons[index].name = name;
+                  persons[index].age = age;
+                  persons[index].hobbies = hobbies;
+                }
+              });
+            } else {
+              const message = 'ID not found';
+              res.writeHead(404, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify(message, null, 2));
+            }
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ id, ...editedPerson[0] }, null, 2));
+          }
+        } else {
+          const message = { message: 'wrong or empty id parameter!' };
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(message, null, 2));
+        }
+      });
+    } catch (error) {
+      const message = { message: `Error execution ${error}` };
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(message, null, 2));
+    }
+  }
+  if (req.url.match(/\/person\/\w+/) && req.method === 'DELETE') {
+    try {
+      const delId = String(personIdParam);
+      if (!delId) {
+        const message = { message: 'no query parameter!' };
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(message, null, 2));
       }
-    });
-  }
-  if (req.url.match(/\/person\/\w+/) && req.method === 'DELETE') {
-    const delId = String(personIdParam);
-    if (!delId) {
-      const message = { message: 'no query parameter!' };
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(message, null, 2));
-    }
-    if (validate(delId)) {
-      const editedPerson = persons.filter((person) => person.id === delId);
-      if (editedPerson[0]) {
-        persons = persons.filter((person) => person.id !== delId);
+      if (validate(delId)) {
+        const editedPerson = persons.filter((person) => person.id === delId);
+        if (editedPerson[0]) {
+          persons = persons.filter((person) => person.id !== delId);
+        } else {
+          const message = 'ID not found';
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(message, null, 2));
+        }
+        res.writeHead(204, { 'Content-Type': 'application/json' });
+        res.end();
       } else {
-        const message = 'ID not found';
+        const message = { message: 'empty or invalid ID!' };
         res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(message, null, 2));
       }
-      res.writeHead(204, { 'Content-Type': 'application/json' });
-      res.end();
-    } else {
-      const message = { message: 'empty or invalid ID!' };
-      res.writeHead(404, { 'Content-Type': 'application/json' });
+    } catch (error) {
+      const message = { message: `Error execution ${error}` };
+      res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(message, null, 2));
     }
   }
