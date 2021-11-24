@@ -55,7 +55,7 @@ const server = http.createServer((req, res) => {
         persons.push({ id: uuidv4(), ...validatedUser.userObject });
 
         res.writeHead(201, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(persons, null, 2));
+        res.end(JSON.stringify(validatedUser.userObject, null, 2));
       } else {
         // const message = { message: 'no title in body request!' };
 
@@ -75,15 +75,22 @@ const server = http.createServer((req, res) => {
           res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify(validatedUser.message, null, 2));
         } else {
-          persons.forEach((person, index) => {
-            if (person.id === id) {
-              persons[index].name = name;
-              persons[index].age = age;
-              persons[index].hobbies = hobbies;
-            }
-          });
+          const editedPerson = persons.filter((person) => person.id === id);
+          if (editedPerson[0]) {
+            persons.forEach((person, index) => {
+              if (person.id === id) {
+                persons[index].name = name;
+                persons[index].age = age;
+                persons[index].hobbies = hobbies;
+              }
+            });
+          } else {
+            const message = 'ID not found';
+            res.writeHead(404, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(message, null, 2));
+          }
           res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(persons, null, 2));
+          res.end(JSON.stringify(editedPerson[0], null, 2));
         }
       } else {
         const message = { message: 'wrong or empty id parameter!' };
@@ -100,12 +107,18 @@ const server = http.createServer((req, res) => {
       res.end(JSON.stringify(message, null, 2));
     }
     if (validate(delId)) {
-      persons = persons.filter((person) => person.id !== delId);
-
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(persons, null, 2));
+      const editedPerson = persons.filter((person) => person.id === delId);
+      if (editedPerson[0]) {
+        persons = persons.filter((person) => person.id !== delId);
+      } else {
+        const message = 'ID not found';
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(message, null, 2));
+      }
+      res.writeHead(204, { 'Content-Type': 'application/json' });
+      res.end();
     } else {
-      const message = { message: 'person is wrong!' };
+      const message = { message: 'empty or invalid ID!' };
       res.writeHead(404, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(message, null, 2));
     }
