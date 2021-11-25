@@ -30,8 +30,7 @@ const server = http.createServer((req, res) => {
     return { valid: true, userObject };
   };
 
-  // TODO write regExp for support "/" to end of pass
-  if (req.url === '/person' && req.method === 'GET') {
+  if ((req.url === '/person' || req.url === '/person/') && req.method === 'GET') {
     try {
       // throw new Error('This is 500 error');
       res.end(JSON.stringify(persons));
@@ -66,7 +65,7 @@ const server = http.createServer((req, res) => {
     }
   }
 
-  if (req.url === '/person' && req.method === 'POST') {
+  if ((req.url === '/person' || req.url === '/person/') && req.method === 'POST') {
     try {
       req.on('end', () => {
         const message = { message: 'no title in body request!' };
