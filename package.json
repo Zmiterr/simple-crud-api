@@ -2,9 +2,9 @@
   "name": "simple-crud-api",
   "version": "1.0.0",
   "description": "",
-  "main": "simple-crud-api.js",
+  "main": "src/simple-crud-api.js",
   "scripts": {
-    "start": "nodemon simple-crud-api.js",
+    "start": "nodemon src/simple-crud-api.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
