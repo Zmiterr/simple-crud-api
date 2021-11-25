@@ -18,8 +18,8 @@ const server = http.createServer((req, res) => {
       const message = { message: 'name and age is required params' };
       return { valid: false, message };
     }
-    if (hobbies && !(Array.isArray(hobbies))) {
-      const message = { message: 'hobbies must be array' };
+    if (!hobbies || !(Array.isArray(hobbies))) {
+      const message = { message: 'empty or invalid hobbies parameter' };
       return { valid: false, message };
     }
     const userObject = {
