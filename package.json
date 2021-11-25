@@ -5,6 +5,9 @@
   "main": "src/simple-crud-api.js",
   "scripts": {
     "start": "nodemon src/simple-crud-api.js",
+    "dev": "webpack --config-name dev && nodemon node ./dist/server.js",
+    "prod": "webpack --config-name prod",
+
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
