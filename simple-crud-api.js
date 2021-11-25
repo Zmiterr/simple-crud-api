@@ -39,9 +39,7 @@ const server = http.createServer((req, res) => {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(message, null, 2));
     }
-  }
-
-  if (req.url.match(/\/person\/\w+/) && req.method === 'GET') {
+  } else if (req.url.match(/\/person\/\w+/) && req.method === 'GET') {
     try {
       if (validate(personIdParam)) {
         const editedPerson = persons.filter((person) => person.id === personIdParam);
@@ -63,9 +61,7 @@ const server = http.createServer((req, res) => {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(message, null, 2));
     }
-  }
-
-  if ((req.url === '/person' || req.url === '/person/') && req.method === 'POST') {
+  } else if ((req.url === '/person' || req.url === '/person/') && req.method === 'POST') {
     try {
       req.on('end', () => {
         const message = { message: 'no title in body request!' };
@@ -94,8 +90,7 @@ const server = http.createServer((req, res) => {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(message, null, 2));
     }
-  }
-  if (req.url.match(/\/person\/\w+/) && req.method === 'PUT') {
+  } else if (req.url.match(/\/person\/\w+/) && req.method === 'PUT') {
     try {
       req.on('data', (data) => {
         const { name, age, hobbies } = JSON.parse(data);
@@ -135,8 +130,7 @@ const server = http.createServer((req, res) => {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(message, null, 2));
     }
-  }
-  if (req.url.match(/\/person\/\w+/) && req.method === 'DELETE') {
+  } else if (req.url.match(/\/person\/\w+/) && req.method === 'DELETE') {
     try {
       const delId = String(personIdParam);
       if (!delId) {
@@ -165,10 +159,11 @@ const server = http.createServer((req, res) => {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(message, null, 2));
     }
+  } else {
+    const message = `Error 404:  ${req.url} not found`;
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(message, null, 2));
   }
-  const message = `Error 404:  ${req.url} not found`;
-  res.writeHead(404, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify(message, null, 2));
 });
 
 // eslint-disable-next-line no-console
