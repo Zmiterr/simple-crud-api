@@ -4,6 +4,7 @@ module.exports = [{
   mode: 'development',
   name: 'dev',
   target: 'node',
+  // watch: true,
   entry: {
     server: './src/simple-crud-api.js',
   },
