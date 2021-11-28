@@ -1,6 +1,31 @@
 # simple-crud-api
 simple CRUD API using in-memory database underneath
 
+Привет! Требования задачи проверены в тестах, так что можешь сэкономить себе  время :)
+
+#### Работа с приложением
+
+Установите все зависимости
+```
+npm i
+```
+
+Поднимите локальный сервер для разработки
+```
+npm run dev
+```
+
+Серер станет доступен по адресу http://127.0.0.1:5000/
+
+Запуск тестов
+```
+npm run test
+```
+Запуск прод версии
+```
+npm run prod
+```
+
 ## Details:
 
 1. The task must be solved using only **pure Node.js**. Any libraries and packages (except `nodemon`, `eslint` and its plugins, `prettier` and its plugins, `uuid`, `webpack` and its plugins, testing tools, `dotenv`, `cross-env`) **are prohibited**.
