@@ -14,14 +14,17 @@ const server = http.createServer((req, res) => {
   const path = req.url.split('/');
   const personIdParam = path[path.indexOf('person') + 1];
 
+  const sendRequestError = (code, errorMessage) => {
+    res.writeHead(code, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify(errorMessage, null, 2));
+  };
+
   if ((req.url === '/person' || req.url === '/person/') && req.method === 'GET') {
     try {
       // throw new Error('This is 500 error');
       res.end(JSON.stringify(persons));
     } catch (error) {
-      const message = { message: `Error execution ${error}` };
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(message, null, 2));
+      sendRequestError(500, `Error execution ${error}`);
     }
   } else if (req.url.match(/\/person\/\w+/) && req.method === 'GET') {
     try {
@@ -31,9 +34,7 @@ const server = http.createServer((req, res) => {
           const selectedPerson = persons.filter((person) => person.id === personIdParam);
           res.end(JSON.stringify(selectedPerson[0]));
         } else {
-          const message = 'ID not found';
-          res.writeHead(404, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(message, null, 2));
+          sendRequestError(404, 'ID not found');
         }
       } else {
         const message = 'invalid ID';
@@ -41,9 +42,7 @@ const server = http.createServer((req, res) => {
         res.end(JSON.stringify(message, null, 2));
       }
     } catch (error) {
-      const message = { message: `Error execution ${error}` };
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(message, null, 2));
+      sendRequestError(500, `Error execution ${error}`);
     }
   } else if ((req.url === '/person' || req.url === '/person/') && req.method === 'POST') {
     try {
@@ -63,16 +62,11 @@ const server = http.createServer((req, res) => {
           res.writeHead(201, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify(persons[persons.length - 1], null, 2));
         } else {
-        // const message = { message: 'no title in body request!' };
-
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(validatedUser.message, null, 2));
+          sendRequestError(400, validatedUser.message);
         }
       });
     } catch (error) {
-      const message = { message: `Error execution ${error}` };
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(message, null, 2));
+      sendRequestError(500, `Error execution ${error}`);
     }
   } else if (req.url.match(/\/person\/\w+/) && req.method === 'PUT') {
     try {
@@ -83,8 +77,7 @@ const server = http.createServer((req, res) => {
         const id = String(personIdParam);
         if (validate(id)) {
           if (!(validatedUser.valid)) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(validatedUser.message, null, 2));
+            sendRequestError(400, validatedUser.message);
           } else {
             const editedPerson = persons.filter((person) => person.id === id);
             if (editedPerson[0]) {
@@ -96,57 +89,41 @@ const server = http.createServer((req, res) => {
                 }
               });
             } else {
-              const message = 'ID not found';
-              res.writeHead(404, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify(message, null, 2));
+              sendRequestError(404, 'ID not found');
             }
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ id, ...editedPerson[0] }, null, 2));
           }
         } else {
-          const message = 'wrong or empty id parameter!';
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(message, null, 2));
+          sendRequestError(400, 'wrong or empty id parameter!');
         }
       });
     } catch (error) {
-      const message = { message: `Error execution ${error}` };
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(message, null, 2));
+      sendRequestError(500, `Error execution ${error}`);
     }
   } else if (req.url.match(/\/person\/\w+/) && req.method === 'DELETE') {
     try {
       const delId = String(personIdParam);
       if (!delId) {
-        const message = { message: 'no query parameter!' };
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(message, null, 2));
+        sendRequestError(400, 'no query parameter!');
       }
       if (validate(delId)) {
         const editedPerson = persons.filter((person) => person.id === delId);
         if (editedPerson[0]) {
           persons = persons.filter((person) => person.id !== delId);
         } else {
-          const message = 'ID not found';
-          res.writeHead(404, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(message, null, 2));
+          sendRequestError(404, 'ID not found');
         }
         res.writeHead(204, { 'Content-Type': 'application/json' });
         res.end();
       } else {
-        const message = 'invalid ID';
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(message, null, 2));
+        sendRequestError(400, 'invalid ID');
       }
     } catch (error) {
-      const message = { message: `Error execution ${error}` };
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify(message, null, 2));
+      sendRequestError(500, `Error execution ${error}`);
     }
   } else {
-    const message = `Error 404:  ${req.url} not found`;
-    res.writeHead(404, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(message, null, 2));
+    sendRequestError(404, `Error 404:  ${req.url} not found`);
   }
 });
 
