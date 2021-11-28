@@ -15,17 +15,21 @@ const server = http.createServer((req, res) => {
 
   const validateParams = (name, age, hobbies) => {
     if (!name || !age) {
-      const message = { message: 'name and age is required params' };
+      const message = 'absent is required params';
+      return { valid: false, message };
+    }
+    if (Number.isNaN(Number(age))) {
+      const message = 'can\'t convert age parameter to string';
       return { valid: false, message };
     }
     if (!hobbies || !(Array.isArray(hobbies))) {
-      const message = { message: 'empty or invalid hobbies parameter' };
+      const message = 'empty or invalid hobbies parameter';
       return { valid: false, message };
     }
     const userObject = {
       name: name.toString(),
       age: Number(age),
-      hobbies,
+      hobbies: hobbies.map((hobby) => String(hobby)),
     };
     return { valid: true, userObject };
   };
@@ -120,7 +124,7 @@ const server = http.createServer((req, res) => {
             res.end(JSON.stringify({ id, ...editedPerson[0] }, null, 2));
           }
         } else {
-          const message = { message: 'wrong or empty id parameter!' };
+          const message = 'wrong or empty id parameter!';
           res.writeHead(400, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify(message, null, 2));
         }
@@ -150,8 +154,8 @@ const server = http.createServer((req, res) => {
         res.writeHead(204, { 'Content-Type': 'application/json' });
         res.end();
       } else {
-        const message = { message: 'empty or invalid ID!' };
-        res.writeHead(404, { 'Content-Type': 'application/json' });
+        const message = 'invalid ID';
+        res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(message, null, 2));
       }
     } catch (error) {
