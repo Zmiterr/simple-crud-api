@@ -7,6 +7,7 @@ extends:
 rules:
   no-plusplus: off
   no-mixed-operators: off
+  jest/expect-expect: off
 plugins:
   - 'jest'
 

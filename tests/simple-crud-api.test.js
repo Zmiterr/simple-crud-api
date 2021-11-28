@@ -9,7 +9,7 @@ const body = {
   hobbies: ['guitar', 'codding'],
 };
 
-const modifedBody = {
+const modifiedBody = {
   name: 'Zmiter',
   age: 33,
   hobbies: ['guitar', 'codding'],
@@ -54,9 +54,9 @@ describe('Script from example', () => {
   });
   it('Put must return edited object with same id', async () => {
     await api.put(`/person/${personId}`)
-      .send(modifedBody)
+      .send(modifiedBody)
       .expect('Content-Type', /json/)
-      .expect({ id: personId, ...modifedBody })
+      .expect({ id: personId, ...modifiedBody })
       .expect(200);
   });
   it('Delete must return 204 success code', async () => {
@@ -84,7 +84,7 @@ describe('Script check errors', () => {
 
   it('Put with invalid id must return 400 error', async () => {
     await api.put(`/person/${invalidId}`)
-      .send(modifedBody)
+      .send(modifiedBody)
       .expect('Content-Type', /json/)
       .expect('"wrong or empty id parameter!"')
       .expect(400);
