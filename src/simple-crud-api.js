@@ -19,6 +19,21 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify(errorMessage, null, 2));
   };
 
+  const sendResponse = (code, response, isReplace) => {
+    res.writeHead(code, { 'Content-Type': 'application/json' });
+    if (response) {
+      if (isReplace) {
+        res.end(JSON.stringify(response, null, 2));
+      } else {
+        res.end(JSON.stringify(response));
+      }
+    } else {
+      (
+        res.end()
+      );
+    }
+  };
+
   if ((req.url === '/person' || req.url === '/person/') && req.method === 'GET') {
     try {
       // throw new Error('This is 500 error');
@@ -32,14 +47,12 @@ const server = http.createServer((req, res) => {
         const editedPerson = persons.filter((person) => person.id === personIdParam);
         if (editedPerson[0]) {
           const selectedPerson = persons.filter((person) => person.id === personIdParam);
-          res.end(JSON.stringify(selectedPerson[0]));
+          sendResponse(200, selectedPerson[0]);
         } else {
           sendRequestError(404, 'ID not found');
         }
       } else {
-        const message = 'invalid ID';
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(message, null, 2));
+        sendRequestError(400, 'invalid ID');
       }
     } catch (error) {
       sendRequestError(500, `Error execution ${error}`);
@@ -47,10 +60,7 @@ const server = http.createServer((req, res) => {
   } else if ((req.url === '/person' || req.url === '/person/') && req.method === 'POST') {
     try {
       req.on('end', () => {
-        const message = { message: 'no title in body request!' };
-
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(message, null, 2));
+        sendRequestError(400, 'no title in body request!');
       });
       req.on('data', (data) => {
         const { name, age, hobbies } = JSON.parse(data);
@@ -59,8 +69,8 @@ const server = http.createServer((req, res) => {
         if (validatedUser.valid) {
           persons.push({ id: uuidv4(), ...validatedUser.userObject });
 
-          res.writeHead(201, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(persons[persons.length - 1], null, 2));
+          const lastPerson = persons[persons.length - 1];
+          sendResponse(201, lastPerson, true);
         } else {
           sendRequestError(400, validatedUser.message);
         }
@@ -91,8 +101,8 @@ const server = http.createServer((req, res) => {
             } else {
               sendRequestError(404, 'ID not found');
             }
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ id, ...editedPerson[0] }, null, 2));
+            const editedPersonObject = { id, ...editedPerson[0] };
+            sendResponse(200, editedPersonObject, true);
           }
         } else {
           sendRequestError(400, 'wrong or empty id parameter!');
@@ -114,8 +124,7 @@ const server = http.createServer((req, res) => {
         } else {
           sendRequestError(404, 'ID not found');
         }
-        res.writeHead(204, { 'Content-Type': 'application/json' });
-        res.end();
+        sendResponse(204);
       } else {
         sendRequestError(400, 'invalid ID');
       }
